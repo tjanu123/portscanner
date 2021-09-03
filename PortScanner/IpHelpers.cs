@@ -52,18 +52,12 @@ namespace PortScanner
             throw new ArgumentException($"Can't find subnet mask for IP address '{address}'");
         }
 
-        public static IPAddress GetLocalIPAddress()
+        public static IPAddress GetLocalIpAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip;
-                }
-            }
-
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            using Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530);
+            var endPoint = socket.LocalEndPoint as IPEndPoint;
+            return endPoint.Address;
         }
     }
 }
