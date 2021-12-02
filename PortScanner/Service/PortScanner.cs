@@ -1,7 +1,7 @@
-﻿using System;
+﻿using PortScanner.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -10,30 +10,33 @@ namespace PortScanner
 {
     public class PortScanner : IPortScanner
     {
+        //LOGGING INTERFACE
+        //tcp interface
+        //
+        //
+
+
+
+        private readonly IWriter _writer;
         private const int MAX_PORT = 65535;
 
         private uint _ip;
         private uint _mask;
 
-        public PortScanner()
+        private uint NetworkAddress => _ip & _mask;
+        private uint BroadcastAddress => NetworkAddress + ~_mask;
+        private List<ConnectionResult> ConnectionResults { get; } = new List<ConnectionResult>();
+        private List<IPAddress> SubnetHosts { get; } = new List<IPAddress>();
+
+        public PortScanner(IWriter writer)
         {
+            _writer = writer;
+
             var clientIp = IpHelpers.GetLocalIpAddress();
             _ip = clientIp.ParseIp();
             _mask = clientIp.GetSubnetMask().ParseIp();
             GetSubnetHosts();
         }
-
-        public PortScanner(IPAddress ipAddress, IPAddress subnetMask)
-        {
-            _ip = ipAddress.ParseIp();
-            _mask = subnetMask.ParseIp();
-            GetSubnetHosts();
-        }
-
-        private uint NetworkAddress => _ip & _mask;
-        private uint BroadcastAddress => NetworkAddress + ~_mask;
-        private List<ConnectionResult> ConnectionResults { get; } = new List<ConnectionResult>();
-        private List<IPAddress> SubnetHosts { get; } = new List<IPAddress>();
 
         public async Task StartScanningAsync()
         {
@@ -53,15 +56,8 @@ namespace PortScanner
 
             stopWatch.Stop();
             Console.WriteLine("Time elapsed:" + stopWatch.ElapsedMilliseconds);
-        }
 
-        public async Task WriteResultsToFileAsync()
-        {
-            await using var writer = new StreamWriter("PortScannerResults.txt");
-            foreach (var result in ConnectionResults)
-            {
-                await writer.WriteLineAsync($"CONNECTED  IP: {result.IpAddress} - port number: {result.Port}");
-            }
+            await _writer.WriteToFileAsync(ConnectionResults);
         }
 
         private async Task CheckConnectionAsync(IPAddress ip, int port)
@@ -76,8 +72,6 @@ namespace PortScanner
             }
             catch (SocketException)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"REJECTED IP: {ip} - port number: {port}");
             }
         }
 

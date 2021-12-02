@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PortScanner.Interfaces;
+using PortScanner.Service;
+using System;
 using System.Threading.Tasks;
 
 namespace PortScanner
@@ -7,10 +9,11 @@ namespace PortScanner
     {
         static async Task Main(string[] args)
         {
-            IPortScanner portScanner = new PortScanner();
+            IWriter writer = new Writer();
+
+            IPortScanner portScanner = new PortScanner(writer);
 
             await portScanner.StartScanningAsync();
-            await portScanner.WriteResultsToFileAsync();
 
             Console.ReadKey();
             Console.ReadKey();
