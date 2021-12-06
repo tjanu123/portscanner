@@ -4,6 +4,6 @@ namespace PortScanner
 {
     public interface IPortScanner
     {
-        Task StartScanningAsync();
+        Task StartScanningAsync(int maxPortToScan = 65536);
     }
 }

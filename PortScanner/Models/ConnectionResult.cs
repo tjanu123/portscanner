@@ -6,5 +6,6 @@ namespace PortScanner
     {
         public IPAddress IpAddress { get; set; }
         public int Port { get; set; }
+        public bool Connected { get; set; }
     }
 }

@@ -1,22 +1,25 @@
 ﻿using PortScanner.Interfaces;
 using PortScanner.Service;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace PortScanner
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            IWriter writer = new Writer();
+            IWriter writer = new FileWriter();
+            ITcpClient tcpClient = new TcpClient();
+            INetworkInterface networkInterface = new NetworkInterface();
 
-            IPortScanner portScanner = new PortScanner(writer);
+            IPortScanner portScanner = new PortScanner(tcpClient, writer, networkInterface);
 
             await portScanner.StartScanningAsync();
 
-            Console.ReadKey();
-            Console.ReadKey();
+            Console.WriteLine("Scanning run to completion");
         }
     }
 }

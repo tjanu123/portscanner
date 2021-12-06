@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PortScanner.Service
 {
-    public class Writer : IWriter
+    public class FileWriter : IWriter
     {
-        public async Task WriteToFileAsync(List<ConnectionResult> connectionResults)
+        public async Task WriteAsync(List<ConnectionResult> connectionResults)
         {
             await using var writer = new StreamWriter("PortScannerResults.txt");
             foreach (var result in connectionResults)
